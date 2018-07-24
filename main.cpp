@@ -96,18 +96,19 @@ int main(int argc, char* argv[])
     thread thread1(stitcher_thread, 1);
     thread thread2(stitcher_thread, 2);
     thread thread3(stitcher_thread, 3);
+    
+    {
+        vector<Mat> vids(3);
+        vid0 >> vids[0];
+        vid1 >> vids[1];
+        vid2 >> vids[2];
 
-    vector<Mat> vids(3);
-        
-    vid0 >> vids[0];
-    vid1 >> vids[1];
-    vid2 >> vids[2];
-
-    STICHER_DBG_OUT("start stitching first frame");
-    Basic_stitcher stitcher(false);
-    Mat pano = stitcher.stitcher_do_all(vids);
-    STICHER_DBG_OUT("push to output queue");
-    output.push_back(pano);
+        STICHER_DBG_OUT("start stitching first frame");
+        Basic_stitcher stitcher(false);
+        Mat pano = stitcher.stitcher_do_all(vids);
+        STICHER_DBG_OUT("push to output queue");
+        output.push_back(pano);
+    }
 
     int capture_count = 0;
     while(capture_count < 12)
@@ -119,11 +120,11 @@ int main(int argc, char* argv[])
         thread_args th_arg;
         Mat tmp;
         vid0 >> tmp;
-        th_arg.imgs.push_back(tmp);
+        th_arg.imgs.push_back(tmp.clone());
         vid1 >> tmp;
-        th_arg.imgs.push_back(tmp);
+        th_arg.imgs.push_back(tmp.clone());
         vid2 >> tmp;
-        th_arg.imgs.push_back(tmp);
+        th_arg.imgs.push_back(tmp.clone());
 
         switch(capture_count % 4)
         {
@@ -176,8 +177,7 @@ int main(int argc, char* argv[])
     {
         Mat result;
         output[i].convertTo(result, CV_8UC1);
-        resize(result, result, Size(1280, 240));
-        imshow("stitch output", output[i]);
+        imshow("stitch output", result);
         waitKey(0);
     }
 
